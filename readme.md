@@ -8,7 +8,7 @@ Delegative democracy, also known as liquid democracy, is a form of democratic co
 
 As you can see the entity named 'Community' is the core of the entire Database diagram, even wrapping the 'User' entity in a single membership community that inherits all his capabilities. This allows a user to belong to several independent communities.
 
-![Database diagram](resources\assets\diagram.png?raw=true "Database diagram")
+![Database diagram](https://raw.githubusercontent.com/garabaya/LDE/master/resources/assets/diagram.png?raw=true "Database diagram")
 
 ## License
 
