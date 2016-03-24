@@ -11,14 +11,7 @@
 |
 */
 
-//Route::get('/', function () {
-//    return view('welcome');
-//});
-Route::controllers(
-    [
-        '/' => 'WelcomeController',
-        'com' => 'CommunityController'
-    ]);
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -31,5 +24,9 @@ Route::controllers(
 */
 
 Route::group(['middleware' => ['web']], function () {
-    //
+    Route::auth();
+    Route::get('/', 'HomeController@index');
+    Route::get('/index', 'HomeController@index');
+    Route::get('/home', 'HomeController@index');
+
 });
