@@ -24,9 +24,9 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    public function join()
+    public function communities()
     {
-        return $this->belongsToMany('lde\Community', 'join');
+        return $this->belongsToMany('lde\Community', 'joins');
     }
 
     public function createdCommunities()

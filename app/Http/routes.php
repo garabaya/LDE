@@ -28,5 +28,6 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/', 'HomeController@index');
     Route::get('/index', 'HomeController@index');
     Route::get('/home', 'HomeController@index');
-
+    Route::get('/com/{id}', 'CommunityController@show')->where('id', '[0-9]+');
+    Route::get('/com/create', 'CommunityController@create');
 });

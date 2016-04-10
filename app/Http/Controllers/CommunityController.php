@@ -4,10 +4,16 @@ namespace lde\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Auth;
+use lde\Community;
 use lde\Http\Requests;
 
 class CommunityController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -25,7 +31,7 @@ class CommunityController extends Controller
      */
     public function create()
     {
-        //
+        return 'New community form';
     }
 
     /**
@@ -42,12 +48,24 @@ class CommunityController extends Controller
     /**
      * Display the specified resource.
      *
+     * The community's view displayed is different if you are joined or not
+     *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
-        //
+        $community = Community::find($id);
+        $users = $community->users()->get();
+        if ($users->contains(Auth::user())){
+            return view('community.joined', [
+                'com' => $community
+            ]);
+        }else{
+            return view('community.show', [
+                'com' => $community
+            ]);
+        }
     }
 
     /**

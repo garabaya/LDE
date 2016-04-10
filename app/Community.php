@@ -7,6 +7,7 @@
 namespace lde;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class Community
@@ -64,7 +65,7 @@ class Community extends Model
 
     public function users()
     {
-        return $this->belongsToMany('lde\User', 'join');
+        return $this->belongsToMany('lde\User', 'joins');
     }
 
     public function propose()
@@ -105,5 +106,21 @@ class Community extends Model
     public function votedMetaInitiatives()
     {
         return $this->belongsToMany('lde\MetaInitiative', 'metaVote');
+    }
+
+    /**
+     * @param $query
+     * @param $paginate elements in each page
+     * @return communities sorted by popularity with pagination
+     */
+    public function scopePopular($query)
+    {
+        $comIds = Join::select('community_id')
+            ->from('joins')->groupBy('community_id')->orderBy(DB::raw('count(*)'), 'DESC')->get();
+        $comIdsStr='';
+        foreach ($comIds as $comId) {
+            $comIdsStr.=','.$comId->community_id;
+        }
+        return $query->where('type','general')->whereIn('id',$comIds)->orderByRaw(DB::raw('FIELD(id,0'.$comIdsStr.')'));
     }
 }
