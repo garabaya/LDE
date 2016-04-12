@@ -5,6 +5,8 @@ namespace lde\Http\Controllers;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 use lde\Community;
 use lde\Http\Requests;
 
@@ -31,7 +33,7 @@ class CommunityController extends Controller
      */
     public function create()
     {
-        return 'New community form';
+        return view('community.create');
     }
 
     /**
@@ -42,7 +44,44 @@ class CommunityController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validate($request, [
+            'name' => 'required|max:100',
+            'description' => 'required|max:255',
+        ]);
+
+        // assume it won't work
+        $success = false;
+
+        DB::beginTransaction();
+
+        try {
+            //Creating a new community
+            $community = new Community;
+            $user = Auth::user();
+
+            $community->name=$request->name;
+            $community->description=$request->description;
+            $community->user_id=$user->id;
+            $community->type='general';
+
+            //joining the user in the new community
+            if ($community->save()) {
+                $this->joinIn($community->id);
+                $success = true;
+            }
+        } catch (\Exception $e) {
+            dd($e);
+        }
+
+        if ($success) {
+            DB::commit();
+            return Redirect::to('/')->withErrors(array(
+                'success' => ['Community '.$community->name.' created successfully.']));
+        } else {
+            DB::rollback();
+            return Redirect::back()->withErrors(array(
+                'danger' => ['Something went wrong']));
+        }
     }
 
     /**
@@ -100,5 +139,28 @@ class CommunityController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    /**
+     * The registered user joins a community
+     *
+     * @param int $community_id id of the community that the user wants to join
+     */
+    public function joinIn($community_id)
+    {
+        $user = Auth::user();
+        $community_type = Community::find($community_id)->type;
+        //We have to wrap the user in a single community if he is joining in a general community (not a lobby)
+        if ($community_type=='general'){
+            $wrap = new Community;
+            $wrap->name=$user->id.'_wrapper';
+            $wrap->description='Wrapper community';
+            $wrap->user_id=$user->id;
+            $wrap->type='single';
+            $wrap->community_id=$community_id;
+            $wrap->save();
+        }
+        //make new realtionship throw pivot (joins table)
+        $user->communities()->attach($community_id);
     }
 }

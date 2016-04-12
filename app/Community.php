@@ -123,4 +123,9 @@ class Community extends Model
         }
         return $query->where('type','general')->whereIn('id',$comIds)->orderByRaw(DB::raw('FIELD(id,0'.$comIdsStr.')'));
     }
+
+    public function isJoined()
+    {
+        return $this->users()->get()->contains(Auth::user());
+    }
 }
