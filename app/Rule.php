@@ -9,6 +9,7 @@ namespace lde;
 
 use Illuminate\Database\Eloquent\Model;
 
+
 /**
  * Class Rule
  * @package lde
@@ -29,6 +30,17 @@ class Rule extends Model
      * community_id: The community affected
      */
     protected $fillable = [
-        'id', 'value', 'type', 'description', 'community_id'
+        'id', 'value', 'type', 'description'
     ];
+
+    /**
+     * @return mixed Return the communities that use the rule and the 'value' column of the pivot
+     * table for each community
+     *
+     * I'm not sure this will be useful for something
+     */
+    public function communities()
+    {
+        return $this->belongsToMany('lde\Community', 'community_rule')->withPivot('value');
+    }
 }

@@ -78,9 +78,12 @@ class Community extends Model
         return $this->hasMany('lde\Initiative', 'scoped_id');
     }
 
+    /**
+     * @return mixed Return the rules of a community including the 'value' column of the pivot table
+     */
     public function rules()
     {
-        return $this->hasMany('lde\Rule');
+        return $this->belongsToMany('lde\Rule','community_rule')->withPivot('value');
     }
 
     public function metapropose()

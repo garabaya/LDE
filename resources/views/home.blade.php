@@ -24,6 +24,26 @@
                 </div>
             </div>
         </div>
-        </div>
     </div>
+    </div>
+
+    <form id="form-join" method="POST" action="{{ action('CommunityController@join') }}">
+    {!! csrf_field() !!}
+        <input type="hidden" name="id" id="com-id">
+    </form>
+@endsection
+
+@section('js')
+    <script>
+        $(document).ready(function () {
+            $('.btn-join').click(function () {
+                var com = $(this).data('com');
+                var form = $('#form-join');
+                var input = $('#com-id');
+                input.val(com);
+//                var url = form.attr('action');
+                form.submit();
+            });
+        });
+    </script>
 @endsection

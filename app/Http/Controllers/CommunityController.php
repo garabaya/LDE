@@ -37,6 +37,29 @@ class CommunityController extends Controller
     }
 
     /**
+     * Join or disjoin the user in a community
+     * Request object contains the 'id' of the community which you want to join (or disjoin) in
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function join(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'required|integer'
+        ]);
+
+        try {
+            $this->joinIn($request->id);
+        } catch (\Exception $e) {
+            return Redirect::back()->withErrors(array(
+                'danger' => ['Something went wrong']));
+        }
+
+        return Redirect::back();
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -70,7 +93,7 @@ class CommunityController extends Controller
                 $success = true;
             }
         } catch (\Exception $e) {
-            dd($e);
+
         }
 
         if ($success) {
@@ -149,18 +172,36 @@ class CommunityController extends Controller
     public function joinIn($community_id)
     {
         $user = Auth::user();
-        $community_type = Community::find($community_id)->type;
-        //We have to wrap the user in a single community if he is joining in a general community (not a lobby)
-        if ($community_type=='general'){
-            $wrap = new Community;
-            $wrap->name=$user->id.'_wrapper';
-            $wrap->description='Wrapper community';
-            $wrap->user_id=$user->id;
-            $wrap->type='single';
-            $wrap->community_id=$community_id;
-            $wrap->save();
+        $community = Community::find($community_id);
+        $community_type = $community->type;
+        // Disjoin
+        if ($user->communities()->get()->contains($community)){
+            //We have to delete the wrapping community if the user is disjoining in a general community (not a lobby)
+            if ($community_type=='general'){
+                $wrap = Community::where([
+                    ['user_id',$user->id],
+                    ['community_id',$community->id]
+                ])->first();
+                $wrap->delete();
+            }
+            //delete the realtionship throw pivot (joins table)
+            $user->communities()->detach($community_id);
+
+            //Join
+        }else{
+            //We have to wrap the user in a single community if he is joining in a general community (not a lobby)
+            if ($community_type=='general'){
+                $wrap = new Community;
+                $wrap->name=$user->id.'_wrapper';
+                $wrap->description='Wrapper community';
+                $wrap->user_id=$user->id;
+                $wrap->type='single';
+                $wrap->community_id=$community_id;
+                $wrap->save();
+            }
+            //make new realtionship throw pivot (joins table)
+            $user->communities()->attach($community_id);
         }
-        //make new realtionship throw pivot (joins table)
-        $user->communities()->attach($community_id);
+
     }
 }

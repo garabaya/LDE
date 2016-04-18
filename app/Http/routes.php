@@ -31,4 +31,5 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/com/{id}', 'CommunityController@show')->where('id', '[0-9]+');
     Route::get('/com/create', 'CommunityController@create');
     Route::post('/com', 'CommunityController@store');
+    Route::post('/com/join', 'CommunityController@join');
 });

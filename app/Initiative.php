@@ -40,7 +40,7 @@ class Initiative extends Model
     }
 
     public function type(){
-        return $this->belongsTo('lde\InitiativeType');
+        return $this->belongsTo('lde\InitiativeType','initiativeType_id');
     }
 
     public function creator()

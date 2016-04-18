@@ -30,7 +30,9 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $communities = Community::popular()->get();
+        //TODO just now I need see all communities. I'll show only popular later
+//        $communities = Community::popular()->get();
+        $communities = Community::where('type','general')->get();
         $joined = Auth::user()->communities()->get();
         return view('home', [
             'coms' => $communities,
