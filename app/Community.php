@@ -131,4 +131,11 @@ class Community extends Model
     {
         return $this->users()->get()->contains(Auth::user());
     }
+
+    public function metaInitiatives()
+    {
+        $community_rule_ids=CommunityRule::select('id')->where('community_id',$this->id)->get();
+        $metaInitiatives = MetaInitiative::whereIn('community_rule_id',$community_rule_ids)->orderBy('created_at')->get();
+        return $metaInitiatives;
+    }
 }

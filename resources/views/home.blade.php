@@ -41,7 +41,6 @@
                 var form = $('#form-join');
                 var input = $('#com-id');
                 input.val(com);
-//                var url = form.attr('action');
                 form.submit();
             });
         });

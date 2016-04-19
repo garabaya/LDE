@@ -30,7 +30,7 @@ class MetaInitiative extends Model
      * thread_id: The thread where users discuss about the metaInitiative
      */
     protected $fillable = [
-        'id','title', 'description', 'community_id', 'rule_id', 'thread_id'
+        'id','title', 'description', 'community_id', 'community_rule_id', 'thread_id'
     ];
 
     public function creator()
@@ -40,7 +40,7 @@ class MetaInitiative extends Model
 
     public function rule()
     {
-        return $this->belongsTo('lde\Rule');
+        return $this->belongsTo('lde\CommunityRule','community_rule_id');
     }
 
     public function thread()

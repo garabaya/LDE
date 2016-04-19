@@ -36,9 +36,9 @@ class AddForeignKeysToMetaInitiatives extends Migration
     public function down()
     {
         Schema::table('metaInitiatives', function (Blueprint $table) {
-            $table->dropForeign('metaInitiatives_community_id_foreign');
-            $table->dropForeign('metaInitiatives_rules_id_foreign');
-            $table->dropForeign('metaInitiatives_thread_id_foreign');
+            $table->dropForeign('metainitiatives_community_id_foreign');
+            $table->dropForeign('metainitiatives_rule_id_foreign');
+            $table->dropForeign('metainitiatives_thread_id_foreign');
         });
     }
 }

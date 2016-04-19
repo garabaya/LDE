@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('menu-items')
+    <li><a href="#">New Initiative</a></li>
+@endsection
+
 @section('content')
 
     <div class="container">
@@ -8,6 +12,7 @@
                 <div class="panel-heading">
                     <h2>{{ $com->name }}</h2>
                     <h3>{{ $com->description }}</h3>
+                    <button type="button" data-com="{{ $com->id }}" class="btn btn-danger btn-join">Disjoin</button>
                 </div>
                 <div class="panel-body">
                     <div class="col-md-6">
@@ -21,7 +26,6 @@
                                         <li>{{ $initiative->title }} ({{ $initiative->type->type }})</li>
                                     @endforeach
                                 </ul>
-
                             </div>
                         </div>
                     </div>
@@ -31,16 +35,39 @@
                                 <h2>Rule initiatives</h2>
                             </div>
                             <div class="panel-body">
-
+                                <ul>
+                                    @foreach($com->metaInitiatives() as $initiative)
+                                        <li><a href="#">{{ $initiative->title }} ({{ $initiative->value }})</a></li>
+                                    @endforeach
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="panel-footer" style="text-align: right;">
-                    Members: {{ $com->users()->count() }}</div>
+                    <a href="#">Members: {{ $com->users()->count() }}</a></div>
             </div>
         </div>
 
     </div>
 
+    <form id="form-join" method="POST" action="{{ action('CommunityController@join') }}">
+        {!! csrf_field() !!}
+        <input type="hidden" name="id" id="com-id">
+    </form>
+
+@endsection
+
+@section('js')
+    <script>
+        $(document).ready(function () {
+            $('.btn-join').click(function () {
+                var com = $(this).data('com');
+                var form = $('#form-join');
+                var input = $('#com-id');
+                input.val(com);
+                form.submit();
+            });
+        });
+    </script>
 @endsection
