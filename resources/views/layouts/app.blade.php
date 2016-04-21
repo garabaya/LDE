@@ -27,7 +27,7 @@
     </style>
 </head>
 <body id="app-layout">
-<nav class="navbar navbar-default">
+<nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
 
@@ -99,8 +99,10 @@
         </ul>
     </div>
     @endif
-
+<div style="margin-top: 60px;">
     @yield('content')
+</div>
+
 
             <!-- JavaScripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>

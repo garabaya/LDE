@@ -24,7 +24,7 @@ class Vote extends Model
      * @var array
      *
      * community_id: The community that votes an initiative
-     * initiative-id: The initiative voted by a community
+     * initiative_id: The initiative voted by a community
      * value: The vote itself
      */
     protected $fillable = [

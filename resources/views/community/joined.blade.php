@@ -37,7 +37,7 @@
                             <div class="panel-body">
                                 <ul>
                                     @foreach($com->metaInitiatives() as $initiative)
-                                        <li><a href="#">{{ $initiative->title }} ({{ $initiative->value }})</a></li>
+                                        <li><a href="{{ action('MetainitiativeController@show',[$initiative->id]) }}">{{ $initiative->title }} ({{ $initiative->value }})</a></li>
                                     @endforeach
                                 </ul>
                             </div>

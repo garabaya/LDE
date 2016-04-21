@@ -36,6 +36,10 @@ class Thread extends Model
         return $this->belongsTo('lde\Initiative');
     }
 
+    public function metainitiative(){
+        return $this->belongsTo('lde\MetaInitiative');
+    }
+
     public function comments()
     {
         return $this->hasMany('lde\Comment');

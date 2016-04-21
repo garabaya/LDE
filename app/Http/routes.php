@@ -32,4 +32,5 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/com/create', 'CommunityController@create');
     Route::post('/com', 'CommunityController@store');
     Route::post('/com/join', 'CommunityController@join');
+    Route::get('/metainitiative/{id}', 'MetainitiativeController@show')->where('id', '[0-9]+');
 });
