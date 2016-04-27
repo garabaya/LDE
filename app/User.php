@@ -38,4 +38,33 @@ class User extends Authenticatable
     {
         return $this->hasMany('lde\Comment');
     }
+
+    /**
+     * @param $community_id
+     * @return Community
+     */
+    public function wrapper($community_id)
+    {
+        $wrapper = Community::where([
+            ['type', 'single'],
+            ['community_id',$community_id],
+            ['user_id',$this->id]
+        ]);
+        return $wrapper->first();
+    }
+    public function support($initiative)
+    {
+        if (get_class($initiative)=='lde\MetaInitiative'){
+            //If the user is joined the metainitiative's community and is not supporting it yet then can support it
+            if ($this->communities->contains($initiative->rule->community) && !$initiative->supportedBy->contains($this->wrapper($initiative->community_id))){
+                $metassuport = new MetaSupport();
+                $metassuport->community_id=$this->wrapper($initiative->rule->community->id)->id;
+                $metassuport->metaInitiative_id=$initiative->id;
+                return $metassuport->save();
+            }else return false;
+        }else{
+            //TODO support iniciativa de la clase Initiative
+            return false;
+        }
+    }
 }

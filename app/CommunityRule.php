@@ -24,4 +24,9 @@ class CommunityRule extends Model
     {
         return $this->hasMany('lde\MetaInitiative','community_rule_id');
     }
+
+    public function community()
+    {
+        return $this->belongsTo('lde\Community');
+    }
 }

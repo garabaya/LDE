@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class MetaSupport extends Model
 {
-    protected $table = 'metaSupports';
+    protected $table = 'metasupports';
     /**
      * The attributes that are mass assignable.
      *
@@ -29,4 +29,5 @@ class MetaSupport extends Model
     protected $fillable = [
         'id','community_id', 'metaInitiative_id'
     ];
+
 }

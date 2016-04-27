@@ -77,7 +77,7 @@
 </nav>
             <!-- Feedback -->
 @if ($errors->has('danger'))
-    <div class="alert alert-danger">
+    <div style="margin-top: 60px;" class="alert alert-danger">
         <ul>
             @foreach($errors->get('danger') as $danger)
                 <strong>
@@ -89,7 +89,7 @@
 @endif
 
 @if ($errors->has('success'))
-    <div class="alert alert-success">
+    <div style="margin-top: 60px;" class="alert alert-success">
         <ul>
             @foreach($errors->get('success') as $success)
                 <strong>
