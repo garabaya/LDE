@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('menu-items')
-    <li><a href="#">New Initiative</a></li>
+    <li><a href="{{ action('CommunityController@createInitiative',array('id'=>$com->id)) }}">New Initiative</a></li>
 @endsection
 
 @section('content')

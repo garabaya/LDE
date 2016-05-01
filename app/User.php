@@ -2,6 +2,7 @@
 
 namespace lde;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
@@ -55,8 +56,21 @@ class User extends Authenticatable
     public function support($initiative)
     {
         if (get_class($initiative)=='lde\MetaInitiative'){
-            //If the user is joined the metainitiative's community and is not supporting it yet then can support it
-            if ($this->communities->contains($initiative->rule->community) && !$initiative->supportedBy->contains($this->wrapper($initiative->community_id))){
+            $community = $initiative->rule->community;
+            $expireDays = intval(CommunityRule::where([
+                ['community_id', $community->id],
+                ['rule_id', '2']
+            ])->first()->value);
+            $expireDate = $initiative->created_at->addDays($expireDays);
+            $date = Carbon::now();
+            //If the user is joined the metainitiative's community and
+            // is not supporting it yet and
+            // is not expired
+            // then can support it
+            if ($this->communities->contains($community) &&
+                !$initiative->supportedBy->contains($this->wrapper($initiative->community_id)) &&
+                $expireDate>$date){
+
                 $metassuport = new MetaSupport();
                 $metassuport->community_id=$this->wrapper($initiative->rule->community->id)->id;
                 $metassuport->metaInitiative_id=$initiative->id;

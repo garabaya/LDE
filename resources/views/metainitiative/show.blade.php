@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('menu-items')
-    <li><a href="#">New Initiative</a></li>
+    <li><a href="{{ action('CommunityController@createInitiative',array('id'=>$community_id)) }}">New Initiative</a></li>
 @endsection
 
 @section('content')
@@ -42,14 +42,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="panel-body">
-                    <hr>
-                    @foreach($comments as $comment)
-                        <p>{{ $comment->created_at.' ' }}<strong>{{ $comment->username.':' }}</strong></p>
-                        <p>{{ $comment->text }}</p>
-                        <hr>
-                    @endforeach
-                </div>
+                @include('partials.thread')
             </div>
         </div>
     </div>

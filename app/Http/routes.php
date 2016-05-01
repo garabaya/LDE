@@ -30,8 +30,13 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/home', 'HomeController@index');
     Route::get('/com/{id}', 'CommunityController@show')->where('id', '[0-9]+');
     Route::get('/com/create', 'CommunityController@create');
+    Route::get('/com/{id}/createInitiative', 'CommunityController@createInitiative')->where('id', '[0-9]+');
     Route::post('/com', 'CommunityController@store');
     Route::post('/com/join', 'CommunityController@join');
     Route::get('/metainitiative/{id}', 'MetainitiativeController@show')->where('id', '[0-9]+');
     Route::post('/metainitiative/support', 'MetainitiativeController@support');
+    Route::get('/metainitiative/create', 'MetainitiativeController@create');
+    Route::post('/metainitiative','MetainitiativeController@store');
+    Route::post('/metainitiative/ruleSelected','MetainitiativeController@ruleSelected');
+    Route::post('/thread', 'ThreadController@comment');
 });

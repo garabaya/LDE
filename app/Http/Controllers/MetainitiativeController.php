@@ -5,6 +5,7 @@ namespace lde\Http\Controllers;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use lde\Community;
 use lde\CommunityRule;
@@ -12,7 +13,9 @@ use lde\Http\Requests;
 use lde\MetaInitiative;
 use lde\MetaSupport;
 use lde\Rule;
+use lde\Thread;
 use lde\User;
+use Symfony\Component\HttpFoundation\Response;
 
 class MetainitiativeController extends Controller
 {
@@ -61,35 +64,32 @@ class MetainitiativeController extends Controller
             //The user that proposed this initiative
             $user = User::find(Community::find($metainitiative->community_id)->user_id);
             $rule->user = $user->name;
-            $comments = $metainitiative->thread->comments;
-            foreach ($comments as $comment) {
-                $comment->username = User::find($comment->user_id)->name;
-            }
+
             $users = $community->users()->get();
             $supporters = MetaSupport::where([
-                ['metainitiative_id',$metainitiative->id]
+                ['metainitiative_id', $metainitiative->id]
             ]);
             $supporters_count = $supporters->count();
-            $metainitiative->supporters=$supporters_count;
+            $metainitiative->supporters = $supporters_count;
 
             $supporting = false;
             $me = Auth::user();
             $wrapper = $me->wrapper($community->id);
-            foreach($supporters->get() as $supporter){
-                if ($supporter->community_id==$wrapper->id){
-                    $supporting=true;
+            foreach ($supporters->get() as $supporter) {
+                if ($supporter->community_id == $wrapper->id) {
+                    $supporting = true;
                     break;
                 }
             }
-
 
 
             if ($users->contains($me)) {
                 return view('metainitiative.show', [
                     'metainitiative' => $metainitiative,
                     'rule' => $rule,
-                    'comments' => $comments,
-                    'supporting' => $supporting
+                    'thread' => $metainitiative->thread,
+                    'supporting' => $supporting,
+                    'community_id' => $community->id
                 ]);
             } else {
                 return Redirect::to('/')->withErrors(array(
@@ -98,6 +98,7 @@ class MetainitiativeController extends Controller
         }
 
     }
+
     public function support(Request $request)
     {
         $metaInitiative = MetaInitiative::find($request->id);
@@ -108,5 +109,95 @@ class MetainitiativeController extends Controller
             return Redirect::back()->withErrors(array(
                 'danger' => ['Something went wrong']));
         }
+    }
+
+    public function create(Request $request)
+    {
+        $community = Community::find($request->community_id);
+        if ($community == null || !$community->isJoined()) {
+            abort(404);
+        }
+        $rules = array();
+        foreach($community->rules()->get() as $rule){
+            $pivot_id=CommunityRule::select('id')->where(array(
+                'community_id' => $community->id,
+                'rule_id' => $rule->id
+            ))->first()->id;
+            $rules[$pivot_id]=$rule->description;
+        }
+        return view('metainitiative.create', array(
+            'community' => $community,
+            'rules' => $rules
+        ));
+    }
+
+    public function store(Request $request)
+    {
+        $this->validate($request, [
+            'title' => 'required|max:100',
+            'description' => 'required|max:255',
+            'value' => 'required'
+        ]);
+        $communityRule = CommunityRule::find($request->community_rule_id);
+        if ($communityRule==null) abort(404);
+        if ($communityRule->rule->type=='boolean'){
+            if ($request->value!='true' || $request->value!='false'){
+                return Redirect::back()->withErrors(array(
+                    'danger' => ['Something went wrong'],
+                    'value' => ['Not the expected value']))->withInput();            }
+        }else{
+            if(!is_numeric($request->value)){
+                return Redirect::back()->withErrors(array(
+                    'danger' => ['Something went wrong'],
+                    'value' => ['Must be numeric']))->withInput();
+            }
+        }
+
+        // assume it won't work
+        $success = false;
+
+        DB::beginTransaction();
+
+        try {
+            //Each initiative have is own discussion thread
+            $thread=new Thread();
+
+            $thread->community_id=$communityRule->community_id;
+            $thread->title=$request->title;
+            $thread->description=$request->description;
+            $thread->type='initiative discussion thread';
+
+            if ($thread->save()){
+                $metainitiative = new MetaInitiative();
+                $user = Auth::user();
+
+                $metainitiative->community_id=$user->wrapper($communityRule->community_id)->id;
+                $metainitiative->community_rule_id=$request->community_rule_id;
+                $metainitiative->title=$request->title;
+                $metainitiative->description=$request->description;
+                $metainitiative->value=$request->value;
+                $metainitiative->thread_id=$thread->id;
+                if ($metainitiative->save()) $success=true;
+            }
+        } catch (\Exception $e) {
+
+        }
+        if ($success) {
+            DB::commit();
+            return Redirect::to('/metainitiative/'.$metainitiative->id)->withErrors(array(
+                'success' => ['Rule initiative created successfully.']));
+        } else {
+            DB::rollback();
+            return Redirect::back()->withErrors(array(
+                'danger' => ['Something went wrong']));
+        }
+    }
+
+    public function ruleSelected(Request $request)
+    {
+            $selected = CommunityRule::find($request->id);
+            $rule=Rule::find($selected->rule_id);
+            $response = array('value'=>$selected->value,'type'=>$rule->type);
+            return $response;
     }
 }

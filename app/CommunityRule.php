@@ -29,4 +29,9 @@ class CommunityRule extends Model
     {
         return $this->belongsTo('lde\Community');
     }
+
+    public function rule()
+    {
+        return $this->belongsTo('lde\Rule');
+    }
 }

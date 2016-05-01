@@ -204,4 +204,11 @@ class CommunityController extends Controller
         }
 
     }
+
+    public function createInitiative($id)
+    {
+        return view('community.createInitiative',array(
+            'id'=>$id
+        ));
+    }
 }
