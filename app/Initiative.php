@@ -36,7 +36,7 @@ class Initiative extends Model
 
     public function thread()
     {
-        return $this->hasOne('lde\Thread');
+        return $this->hasOne('lde\Thread','id');
     }
 
     public function type(){
@@ -55,7 +55,7 @@ class Initiative extends Model
 
     public function supportedBy()
     {
-        return $this->belongsToMany('lde\Community', 'support');
+        return $this->belongsToMany('lde\Community', 'supports');
     }
 
     public function votedBy()

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <a href="#">
+    <a href="{{ action('InitiativeController@create', array('community_id'=>$id)) }}">
         <div class="col-md-6">
             <div class="panel panel-default">
                 <div class="panel-body">

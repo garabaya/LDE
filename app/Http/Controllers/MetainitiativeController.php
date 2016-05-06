@@ -193,6 +193,14 @@ class MetainitiativeController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     *
+     * The form to create a new metainitiative gets the type of the rule that the user has selected
+     * throw an ajax request and change the fields dinamically
+     * This function response to that ajax request with the type and actual value of the rule selected
+     * @return array
+     */
     public function ruleSelected(Request $request)
     {
             $selected = CommunityRule::find($request->id);

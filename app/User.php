@@ -71,14 +71,32 @@ class User extends Authenticatable
                 !$initiative->supportedBy->contains($this->wrapper($initiative->community_id)) &&
                 $expireDate>$date){
 
-                $metassuport = new MetaSupport();
-                $metassuport->community_id=$this->wrapper($initiative->rule->community->id)->id;
-                $metassuport->metaInitiative_id=$initiative->id;
-                return $metassuport->save();
+                $metasupport = new MetaSupport();
+                $metasupport->community_id=$this->wrapper($initiative->rule->community->id)->id;
+                $metasupport->metaInitiative_id=$initiative->id;
+                return $metasupport->save();
             }else return false;
         }else{
-            //TODO support iniciativa de la clase Initiative
-            return false;
+            $community = Community::find($initiative->scoped_id);
+            $expireDays = intval(CommunityRule::where([
+                ['community_id', $community->id],
+                ['rule_id', '2']
+            ])->first()->value);
+            $expireDate = $initiative->created_at->addDays($expireDays);
+            $date = Carbon::now();
+            //If the user is joined the metainitiative's community and
+            // is not supporting it yet and
+            // is not expired
+            // then can support it
+            if ($this->communities->contains($community) &&
+                !$initiative->supportedBy->contains($this->wrapper($initiative->community_id)) &&
+                $expireDate>$date){
+
+                $support = new Support();
+                $support->community_id=$this->wrapper($initiative->scoped_id)->id;
+                $support->initiative_id=$initiative->id;
+                return $support->save();
+            }else return false;
         }
     }
 }

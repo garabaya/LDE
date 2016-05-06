@@ -39,4 +39,11 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/metainitiative','MetainitiativeController@store');
     Route::post('/metainitiative/ruleSelected','MetainitiativeController@ruleSelected');
     Route::post('/thread', 'ThreadController@comment');
+    Route::get('/initiative/create', 'InitiativeController@create');
+    Route::post('/initiative','InitiativeController@store');
+    Route::get('/initiative/{id}', 'InitiativeController@show')->where('id', '[0-9]+');
+    Route::post('/initiative/support', 'InitiativeController@support');
+
+
+
 });

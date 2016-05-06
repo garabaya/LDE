@@ -23,7 +23,7 @@
                             <div class="panel-body">
                                 <ul>
                                     @foreach($com->scopedBy as $initiative)
-                                        <li>{{ $initiative->title }} ({{ $initiative->type->type }})</li>
+                                        <li><a href="{{ action('InitiativeController@show',[$initiative->id]) }}"> {{ $initiative->title }} ({{ $initiative->type->type }})</a></li>
                                     @endforeach
                                 </ul>
                             </div>
