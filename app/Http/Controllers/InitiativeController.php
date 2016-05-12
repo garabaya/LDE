@@ -134,7 +134,6 @@ class InitiativeController extends Controller
                 }
             }
 
-
             if ($users->contains($me)) {
                 return view('initiative.show', [
                     'initiative' => $initiative,

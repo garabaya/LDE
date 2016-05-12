@@ -1,0 +1,32 @@
+body {
+    font-family: 'Lato';
+    background-image: url('people.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center top;
+}
+.panel {
+    background: rgb(255,255,255); /* for IE */
+    background: rgba(255, 255, 255, 0);
+    border: 0;
+}
+
+.panel-body {
+    background: rgb(255,255,255); /* for IE */
+    background: rgba(255, 255, 255, 0.70);
+}
+
+.panel-heading, .panel-footer {
+    background-color: rgb(0,0,0); /* for IE */
+    background-color: rgba(0, 0, 0, 0.50) !important;
+    color: white !important;
+}
+
+
+.fa-btn {
+    margin-right: 6px;
+}
+
+.top60 {
+    margin-top: 60px;
+}

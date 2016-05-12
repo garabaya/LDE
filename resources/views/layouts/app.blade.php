@@ -16,16 +16,7 @@
     <!-- Styles -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     {{-- <link href="{{ elixir('css/app.css') }}" rel="stylesheet"> --}}
-
-    <style>
-        body {
-            font-family: 'Lato';
-        }
-
-        .fa-btn {
-            margin-right: 6px;
-        }
-    </style>
+    {{ Html::style('app.css') }}
 </head>
 <body id="app-layout">
 <nav class="navbar navbar-default navbar-fixed-top">
@@ -42,8 +33,8 @@
             </button>
 
             <!-- Branding Image -->
-            <a class="navbar-brand" href="{{ url('/') }}">
-                Liquid Democracy Experiment
+            <a href="{{ url('/') }}">
+                {{ Html::image(asset('Images/lde.svg'),'lde logo',array('class'=>'navbar-brand','style'=>'padding: 0px;')) }}<span class="navbar-brand">Liquid Democracy Experiment</span>
             </a>
         </div>
 
@@ -78,7 +69,7 @@
 </nav>
             <!-- Feedback -->
 @if ($errors->has('danger'))
-    <div style="margin-top: 60px;" class="alert alert-danger">
+    <div class="alert alert-danger top60">
         <ul>
             @foreach($errors->get('danger') as $danger)
                 <strong>
@@ -90,7 +81,7 @@
 @endif
 
 @if ($errors->has('success'))
-    <div style="margin-top: 60px;" class="alert alert-success">
+    <div class="alert alert-success top60">
         <ul>
             @foreach($errors->get('success') as $success)
                 <strong>
@@ -100,7 +91,7 @@
         </ul>
     </div>
     @endif
-<div style="margin-top: 60px;">
+<div class="top60">
     @yield('content')
 </div>
 

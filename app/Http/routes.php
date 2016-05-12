@@ -43,6 +43,8 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/initiative','InitiativeController@store');
     Route::get('/initiative/{id}', 'InitiativeController@show')->where('id', '[0-9]+');
     Route::post('/initiative/support', 'InitiativeController@support');
+    Route::get('/user/{wrapper_id}', 'UserController@show')->where('wrapper_id', '[0-9]+');
+    Route::get('/user', 'UserController@show');
 
 
 

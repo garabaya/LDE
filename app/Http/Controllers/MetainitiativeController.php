@@ -81,8 +81,6 @@ class MetainitiativeController extends Controller
                     break;
                 }
             }
-
-
             if ($users->contains($me)) {
                 return view('metainitiative.show', [
                     'metainitiative' => $metainitiative,

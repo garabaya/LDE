@@ -45,7 +45,7 @@ class MetaInitiative extends Model
 
     public function thread()
     {
-        return $this->hasOne('lde\Thread','id');
+        return $this->hasOne('lde\Thread','id','thread_id');
     }
 
     public function supportedBy()
