@@ -8,7 +8,7 @@ Delegative democracy, also known as liquid democracy, is a form of democratic co
 
 At first, let me explain why it's an experimental project:
 
-    With this web app you can create and join every community you want governed by a delegative democracy system, but if you want to use it in a real enviroment you should perform some features to confirm the user's identity and some kind of access control system for private communities.
+ With this web app you can create and join every community you want governed by a delegative democracy system, but if you want to use it in a real enviroment you should perform some features to confirm the user's identity and some kind of access control system for private communities.
 
 As you can see the entity named 'Community' is the core of the entire Database diagram, even wrapping the 'User' entity in a single membership community that inherits all his capabilities. This allows a user to belong to several independent communities.
 
