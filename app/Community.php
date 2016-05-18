@@ -6,6 +6,7 @@
  */
 namespace lde;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +42,7 @@ class Community extends Model
 
     public function creator()
     {
-        return $this->belongsTo('lde\User');
+        return $this->hasOne('lde\User', 'id', 'user_id');
     }
 
     public function super()
@@ -54,14 +55,15 @@ class Community extends Model
         return $this->hasMany('lde\Community');
     }
 
-    public function delegateIn()
+    public function delegateIn($initiativeType_id = null)
     {
-        return $this->belongsToMany('lde\Community', 'delegation', 'community_id', 'delegated_id');
+        if ($initiativeType_id == null) return $this->belongsToMany('lde\Community', 'delegations', 'community_id', 'delegated_id')->withPivot('id', 'initiativeType_id');
+        else return $this->belongsToMany('lde\Community', 'delegations', 'community_id', 'delegated_id')->withPivot('id', 'initiativeType_id')->wherePivot('initiativeType_id', $initiativeType_id);
     }
 
     public function delegatedBy()
     {
-        return $this->belongsToMany('lde\Community', 'delegation', 'delegated_id', 'community_id');
+        return $this->belongsToMany('lde\Community', 'delegations', 'delegated_id', 'community_id')->withPivot('id', 'initiativeType_id');
     }
 
     public function users()
@@ -69,9 +71,10 @@ class Community extends Model
         return $this->belongsToMany('lde\User', 'joins');
     }
 
-    public function propose()
+    public function propose($community_id)
     {
-        return $this->hasMany('lde\Initiative');
+        if ($community_id == null) return $this->hasMany('lde\Initiative');
+        else return $this->hasMany('lde\Initiative')->where('scoped_id', $community_id);
     }
 
     public function scopedBy()
@@ -84,12 +87,14 @@ class Community extends Model
      */
     public function rules()
     {
-        return $this->belongsToMany('lde\Rule','community_rule')->withPivot('value');
+        return $this->belongsToMany('lde\Rule', 'community_rule')->withPivot('value');
     }
 
-    public function metapropose()
+    public function metapropose($community_id = null)
     {
-        return $this->hasMany('lde\MetaInitiative');
+        if ($community_id == null) return $this->hasMany('lde\MetaInitiative');
+        else return $this->hasMany('lde\MetaInitiative')->whereIn('community_rule_id', CommunityRule::select('id')->where('community_id', $community_id)->get());
+
     }
 
     public function supportedInitiatives()
@@ -121,11 +126,11 @@ class Community extends Model
     {
         $comIds = Join::select('community_id')
             ->from('joins')->groupBy('community_id')->orderBy(DB::raw('count(*)'), 'DESC')->get();
-        $comIdsStr='';
+        $comIdsStr = '';
         foreach ($comIds as $comId) {
-            $comIdsStr.=','.$comId->community_id;
+            $comIdsStr .= ',' . $comId->community_id;
         }
-        return $query->where('type','general')->whereIn('id',$comIds)->orderByRaw(DB::raw('FIELD(id,0'.$comIdsStr.')'));
+        return $query->where('type', 'general')->whereIn('id', $comIds)->orderByRaw(DB::raw('FIELD(id,0' . $comIdsStr . ')'));
     }
 
     public function isJoined()
@@ -135,8 +140,59 @@ class Community extends Model
 
     public function metaInitiatives()
     {
-        $community_rule_ids=CommunityRule::select('id')->where('community_id',$this->id)->get();
-        $metaInitiatives = MetaInitiative::whereIn('community_rule_id',$community_rule_ids)->orderBy('created_at')->get();
+        $community_rule_ids = CommunityRule::select('id')->where('community_id', $this->id)->get();
+        $metaInitiatives = MetaInitiative::whereIn('community_rule_id', $community_rule_ids)->orderBy('created_at')->get();
         return $metaInitiatives;
+    }
+
+    public function isInDelegatingLine($community_id, $initiativeType_id)
+    {
+        //Is he delegating in somebody?
+        $delegation = Community::find($community_id)->delegation($initiativeType_id);
+        if ($delegation == null) return false;// He is not delegating
+        elseif ($delegation->delegated_id == $this->id) return true;//He is delegating in me
+        else return $this->isInDelegatingLine($delegation->delegated_id, $initiativeType_id);//He is delegating in somebody but not in me
+
+    }
+
+    public function delegation($initiativeType_id)
+    {
+        return $delegation = Delegation::where([
+            'community_id' => $this->id,
+            'initiativeType_id' => $initiativeType_id
+        ])->first();
+    }
+
+    public function delegate($delegated_id, $initiativeType_id)
+    {
+        try {
+            $delegated = Community::findOrFail($delegated_id);
+            if ($this->community_id!=$delegated->community_id) throw new Exception('Delegating and delegated communities must have the same super-community');
+            $delegation = Delegation::where([
+                'community_id' => $this->id,
+                'delegated_id' => $delegated_id,
+                'initiativeType_id' => $initiativeType_id
+            ])->first();
+            if ($delegation==null){
+                $oldDelegation = Delegation::where([
+                    'community_id' => $this->id,
+                    'initiativeType_id' => $initiativeType_id
+                ])->first();
+                DB::beginTransaction();
+                if ($oldDelegation!=null){//If already exists a delegation in other user,
+                                            //we make a recursive call to undo this delegation(detach)
+                    $this->delegate($oldDelegation->delegated_id,$initiativeType_id);
+                }
+                $this->delegateIn()->attach($delegated_id,array('initiativeType_id'=>$initiativeType_id));//attach the new delegation
+            }else{
+                $this->delegateIn()->detach($delegated_id,array('initiativeType_id'=>$initiativeType_id));//detach the delegation
+            }
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollback();
+            return false;
+        }
+
     }
 }

@@ -1,5 +1,13 @@
 @extends('layouts.app')
 
+@section('navigation')
+    <li><a href="{{ action('CommunityController@show',[$community->id]) }}">{{ $community->name }}</a></li>
+@endsection
+
+@section('first-menu-items')
+    <li><a href="{{ action('UserController@show').'/'.Auth::user()->wrapper($community->id)->id }}">Me</a></li>
+@endsection
+
 @section('content')
     <div class="container">
         <div class="col-md-8 col-md-offset-2">

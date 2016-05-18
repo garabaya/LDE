@@ -1,5 +1,13 @@
 @extends('layouts.app')
 
+@section('navigation')
+    <li><a href="{{ action('CommunityController@show',[$com->id]) }}">{{ $com->name }}</a></li>
+@endsection
+
+@section('first-menu-items')
+    <li><a href="{{ action('UserController@show').'/'.Auth::user()->wrapper($com->id)->id }}">Me</a></li>
+@endsection
+
 @section('menu-items')
     <li><a href="{{ action('CommunityController@createInitiative',array('id'=>$com->id)) }}">New Initiative</a></li>
 @endsection
@@ -23,7 +31,9 @@
                             <div class="panel-body">
                                 <ul>
                                     @foreach($com->scopedBy as $initiative)
-                                        <li><a href="{{ action('InitiativeController@show',[$initiative->id]) }}"> {{ $initiative->title }} ({{ $initiative->type->type }})</a></li>
+                                        <li>
+                                            <a href="{{ action('InitiativeController@show',[$initiative->id]) }}"> {{ $initiative->title }}
+                                                ({{ $initiative->type->type }})</a></li>
                                     @endforeach
                                 </ul>
                             </div>
@@ -37,7 +47,9 @@
                             <div class="panel-body">
                                 <ul>
                                     @foreach($com->metaInitiatives() as $initiative)
-                                        <li><a href="{{ action('MetainitiativeController@show',[$initiative->id]) }}">{{ $initiative->title }} ({{ $initiative->value }})</a></li>
+                                        <li>
+                                            <a href="{{ action('MetainitiativeController@show',[$initiative->id]) }}">{{ $initiative->title }}
+                                                ({{ $initiative->value }})</a></li>
                                     @endforeach
                                 </ul>
                             </div>

@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use lde\Community;
+use lde\Delegation;
 use lde\Http\Requests;
+use lde\InitiativeType;
 
 class CommunityController extends Controller
 {
@@ -210,5 +212,100 @@ class CommunityController extends Controller
         return view('community.createInitiative',array(
             'id'=>$id
         ));
+    }
+
+    /**
+     * @param Request $request
+     *
+     * This function responds to an Ajax request to undo a delegation
+     * @return string The html panel with the rest of delegations (if exist)
+     */
+    public static function ajax_undo(Request $request)
+    {
+        $response='';
+        $id=$request->id;
+        $community_id=$request->community_id;
+        $delegated_id=$request->delegated_id;
+        $initiativeType_id=$request->initiativeType_id;
+        //Have we received all parameters?
+        if ($id!=null&&$community_id!=null&&$delegated_id!=null&&$initiativeType_id!=null){
+            //The delegations only can be deleted by the user that is delegating his vote
+            if (Auth::user()->id==Community::find($community_id)->user_id){
+                $delegation=Delegation::find($id);
+                //Validating data
+                if ($delegation->community_id==$community_id && $delegation->delegated_id==$delegated_id && $delegation->initiativeType_id==$initiativeType_id){
+                    $delegation->delete();
+                }
+            }
+        }
+        $delegations = Community::find($community_id)->delegateIn()->get();
+        foreach($delegations as $com_delegated){
+            $com_delegated->initiativeType=InitiativeType::find($com_delegated->pivot->initiativeType_id)->type;
+        }
+        if (count($delegations)>0){
+            $response='<div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h2>My vote delegations</h2>
+                        </div>
+                        <div class="panel-body">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>Initiative type</th>
+                                    <th>Delegating in</th>
+                                    <th></th>
+                                </tr>
+                                </thead>';
+            foreach($delegations as $delegation){
+                $response.='<tr>
+                                        <td>'.$delegation->initiativeType.'</td>
+                                        <td>
+                                            <a href="'.action('UserController@show').'/'.$delegation->id.'">'.$delegation->creator->name.'</a>
+                                        </td>
+                                        <td>
+                                            <button type="button"
+                                                    data-communityId="'.$community_id.'"
+                                                    data-delegatedId="'.$delegation->id.'"
+                                                    data-initiativeTypeId="'.$delegation->pivot->initiativeType_id.'"
+                                                    data-pivot="'.$delegation->pivot->id.'"
+                                                    class="btn btn-danger pull-right btn-join undo">Undo delegation
+                                            </button>
+                                        </td>
+                                    </tr>';
+            }
+            $response.='</table>
+                        </div>
+                    </div>
+                </div>';
+        }
+
+
+
+        return $response;
+
+    }
+    public function delegate(Request $request)
+    {
+        $this->validate($request, [
+            'community_id' => 'required|integer',
+            'delegated_id' => 'required|integer',
+            'initiativeType_id' => 'required|integer'
+        ]);
+        $community_id = $request->community_id;
+        $delegated_id = $request->delegated_id;
+        $initiativeType_id=$request->initiativeType_id;
+
+        try {
+            if (!Auth::user()->wrapper($community_id)->delegate($delegated_id,$initiativeType_id)){
+                return Redirect::back()->withErrors(array(
+                    'danger' => ['Something went wrong']));
+            }
+        } catch (\Exception $e) {
+            return Redirect::back()->withErrors(array(
+                'danger' => ['Something went wrong']));
+        }
+
+        return Redirect::back();
     }
 }

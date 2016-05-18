@@ -33,6 +33,8 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/com/{id}/createInitiative', 'CommunityController@createInitiative')->where('id', '[0-9]+');
     Route::post('/com', 'CommunityController@store');
     Route::post('/com/join', 'CommunityController@join');
+    Route::post('/com/ajax-undo', 'CommunityController@ajax_undo');
+    Route::post('/com/delegate', 'CommunityController@delegate');
     Route::get('/metainitiative/{id}', 'MetainitiativeController@show')->where('id', '[0-9]+');
     Route::post('/metainitiative/support', 'MetainitiativeController@support');
     Route::get('/metainitiative/create', 'MetainitiativeController@create');

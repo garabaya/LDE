@@ -1,7 +1,18 @@
 @extends('layouts.app')
 
+@section('navigation')
+    <li>
+        <a href="{{ action('CommunityController@show',[$community_id]) }}">{{ \lde\Community::find($community_id)->name }}</a>
+    </li>
+@endsection
+
+@section('first-menu-items')
+    <li><a href="{{ action('UserController@show').'/'.Auth::user()->wrapper($community_id)->id }}">Me</a></li>
+@endsection
+
 @section('menu-items')
-    <li><a href="{{ action('CommunityController@createInitiative',array('id'=>$community_id)) }}">New Initiative</a></li>
+    <li><a href="{{ action('CommunityController@createInitiative',array('id'=>$community_id)) }}">New Initiative</a>
+    </li>
 @endsection
 
 @section('content')
@@ -36,9 +47,14 @@
                             Expire date: {{ $metainitiative->expireDate }}<br>
                         </div>
                         @if ($supporting)
-                            <button style="float:left;clear: both;" disabled type="button" class="btn btn-primary btn-join">Supporting</button>
+                            <button style="float:left;clear: both;" disabled type="button"
+                                    class="btn btn-primary btn-join">Supporting
+                            </button>
                         @else
-                            <button style="float:left;clear: both;" type="button" data-metainitiative="{{ $metainitiative->id }}" class="btn btn-primary btn-support">Support this Initiative</button>
+                            <button style="float:left;clear: both;" type="button"
+                                    data-metainitiative="{{ $metainitiative->id }}" class="btn btn-primary btn-support">
+                                Support this Initiative
+                            </button>
                         @endif
                     </div>
                 </div>

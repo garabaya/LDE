@@ -27,31 +27,47 @@ class UserController extends Controller
                 return Redirect::back()->withErrors(array(
                     'danger' => ['You are not allowed.']));
             }
-            $delegations = $wrapper->delegateIn();
+            $coms_delegated = $wrapper->delegateIn()->get();
+            foreach($coms_delegated as $com_delegated){
+                $com_delegated->initiativeType=InitiativeType::find($com_delegated->pivot->initiativeType_id)->type;
+            }
             $weights = array();
             foreach(InitiativeType::get() as $initiativeType){
-                $weights[$initiativeType->type]=Delegation::user_weight($wrapper_id,$initiativeType->id);
+                $type_info = array();
+                $type_info['id']=$initiativeType->id;
+                $type_info['type']=$initiativeType->type;
+                $type_info['weight']=Delegation::user_weight($wrapper_id,$initiativeType->id);
+                $type_info['isDelegatingInMe']=true;
+                array_push($weights,$type_info);
             }
-            //TODO aqui
+
+            //TODO once the voting system is finished, include here a list of pending votations
+            //TODO i.e. a list of still opened initiatives that the user hasn't vote yet
             //I want to see my own user information and settings as a community member
             if ($me->wrapper($community->id)==$wrapper){
                 return view('community.me',[
                     'weights' => $weights,
-                    'community' => $community,
-                    'delegations' => $delegations
+                    'com' => $community,
+                    'delegations' => $coms_delegated
                 ]);
             //I want to see the information community member
             }else{
+                $metainitiatives = $wrapper->metapropose($community->id)->get();
+                $initiatives = $wrapper->propose($community->id)->get();
+                $allInitiatives=$metainitiatives->merge($initiatives)->sortByDesc('created_at');
                 return view('community.user',[
                     'wrapper' => $wrapper,
-                    'community' => $community,
-                    'delegations' => $delegations
+                    'weights' => $weights,
+                    'com' => $community,
+                    'delegations' => $coms_delegated,
+                    'initiatives' => $allInitiatives
                 ]);
             }
-        //general user's settings will be shown
+        //TODO general user's settings will be shown
         }else{
             return view('user.show');
         }
 
     }
+
 }

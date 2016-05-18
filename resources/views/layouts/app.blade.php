@@ -41,7 +41,7 @@
         <div class="collapse navbar-collapse" id="app-navbar-collapse">
             <!-- Left Side Of Navbar -->
             <ul class="nav navbar-nav">
-                <li><a href="{{ url('/home') }}">Home</a></li>
+                @yield('navigation')
             </ul>
 
             <!-- Right Side Of Navbar -->
@@ -57,6 +57,7 @@
                         </a>
 
                         <ul class="dropdown-menu" role="menu">
+                            @yield('first-menu-items')
                             <li><a href="{{ action('CommunityController@create') }}">New Community</a></li>
                             @yield('menu-items')
                             <li><a href="{{ url('/logout') }}"><i class="fa fa-btn fa-sign-out"></i>Logout</a></li>

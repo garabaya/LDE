@@ -1,5 +1,13 @@
 @extends('layouts.app')
 
+@section('first-menu-items')
+    <li><a href="{{ action('UserController@show').'/'.Auth::user()->wrapper($id)->id }}">Me</a></li>
+@endsection
+
+@section('navigation')
+    <li><a href="{{ action('CommunityController@show',[$id]) }}">{{ \lde\Community::find($id)->name }}</a></li>
+@endsection
+
 @section('content')
     <a href="{{ action('InitiativeController@create', array('community_id'=>$id)) }}">
         <div class="col-md-6">
