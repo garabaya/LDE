@@ -29,6 +29,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/index', 'HomeController@index');
     Route::get('/home', 'HomeController@index');
     Route::get('/com/{id}', 'CommunityController@show')->where('id', '[0-9]+');
+    Route::get('/com/members/{id}', 'CommunityController@members')->where('community_id', '[0-9]+');
     Route::get('/com/create', 'CommunityController@create');
     Route::get('/com/{id}/createInitiative', 'CommunityController@createInitiative')->where('id', '[0-9]+');
     Route::post('/com', 'CommunityController@store');

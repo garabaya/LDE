@@ -57,7 +57,7 @@
                     </div>
                 </div>
                 <div class="panel-footer" style="text-align: right;">
-                    <a href="#">Members: {{ $com->users()->count() }}</a></div>
+                    <a href="{{ action('CommunityController@members',[$com->id]) }}">Members: {{ $com->users()->count() }}</a></div>
             </div>
         </div>
 

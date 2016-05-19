@@ -14,6 +14,10 @@ use lde\User;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     public function show($wrapper_id=null)
     {
         //if there isn't $wrapper_id, the general user's settings will be shown

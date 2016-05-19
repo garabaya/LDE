@@ -285,6 +285,7 @@ class CommunityController extends Controller
         return $response;
 
     }
+
     public function delegate(Request $request)
     {
         $this->validate($request, [
@@ -307,5 +308,25 @@ class CommunityController extends Controller
         }
 
         return Redirect::back();
+    }
+
+    /**
+     * @param $community_id
+     * It shows the list of the community($community_id) members ordered by popularity
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function members($community_id)
+    {
+        $members = Community::where('community_id',$community_id)->get();
+        foreach($members as $member){
+            $member->popularity=$member->popularity();
+        }
+        $members=$members->sortByDesc('popularity');
+        $com = Community::find($community_id);
+        return view('community.members',[
+            'members'=>$members,
+            'com'=>$com,
+            'initiativeTypes'=>InitiativeType::all()
+        ]);
     }
 }

@@ -163,6 +163,12 @@ class Community extends Model
         ])->first();
     }
 
+    /**
+     * it makes or undoes a delegation
+     * @param $delegated_id
+     * @param $initiativeType_id
+     * @return bool
+     */
     public function delegate($delegated_id, $initiativeType_id)
     {
         try {
@@ -185,7 +191,12 @@ class Community extends Model
                 }
                 $this->delegateIn()->attach($delegated_id,array('initiativeType_id'=>$initiativeType_id));//attach the new delegation
             }else{
-                $this->delegateIn()->detach($delegated_id,array('initiativeType_id'=>$initiativeType_id));//detach the delegation
+                Delegation::where([
+                    'community_id'=> $this->id,
+                    'delegated_id'=>$delegated_id,
+                    'initiativeType_id'=>$initiativeType_id
+                ])->delete();
+//                $this->delegateIn()->detach($delegated_id,array('initiativeType_id'=>$initiativeType_id));//detach the delegation
             }
             DB::commit();
             return true;
@@ -194,5 +205,12 @@ class Community extends Model
             return false;
         }
 
+    }
+
+    public function popularity()
+    {
+        return Delegation::where([
+            'delegated_id'=>$this->id
+        ])->count();
     }
 }
