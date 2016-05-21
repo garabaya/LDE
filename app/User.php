@@ -74,8 +74,13 @@ class User extends Authenticatable
                 $metasupport = new MetaSupport();
                 $metasupport->community_id=$this->wrapper($initiative->rule->community->id)->id;
                 $metasupport->metaInitiative_id=$initiative->id;
-                return $metasupport->save();
-            }else return false;
+                $response = $metasupport->save();
+                $initiative->checkSupport();
+                return $response;
+            }else {
+                $initiative->checkSupport();
+                return false;
+            }
         }else{
             $community = Community::find($initiative->scoped_id);
             $expireDays = intval(CommunityRule::where([
@@ -95,8 +100,13 @@ class User extends Authenticatable
                 $support = new Support();
                 $support->community_id=$this->wrapper($initiative->scoped_id)->id;
                 $support->initiative_id=$initiative->id;
-                return $support->save();
-            }else return false;
+                $response = $support->save();
+                $initiative->checkSupport();
+                return $response;
+            }else {
+                $initiative->checkSupport();
+                return false;
+            }
         }
     }
 }

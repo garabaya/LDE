@@ -7,6 +7,7 @@
 
 namespace lde;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -31,7 +32,7 @@ class Initiative extends Model
      * thread_id: The thread where users discuss about the initiative
      */
     protected $fillable = [
-        'id','title', 'description', 'community_id', 'scoped_id', 'initiativeType_id', 'thread_id'
+        'id','title', 'description', 'community_id', 'scoped_id', 'initiativeType_id', 'thread_id', 'supported', 'approved'
     ];
 
     public function thread()
@@ -61,5 +62,40 @@ class Initiative extends Model
     public function votedBy()
     {
         return $this->belongsToMany('lde\Community', 'vote');
+    }
+
+    /**
+     * This function checks if the initiative is supported for the needed people to be voted.
+     * It should be called every time the initiative gets a new support.
+     * At the time that the initiative gets the needed supporters, it must pass to the voting period.
+     *
+     * @return mixed
+     */
+    public function checkSupport()
+    {
+        if ($this->supported==null){
+            $community = $this->scope()->first();
+            $expireDays = intval($community->rules()->where('rule_id',2)->first()->pivot->value);
+            $expireDate = $this->created_at->addDays($expireDays);
+            $date = Carbon::now();
+            if ($expireDate>$date){
+                $percentNeeded = intval($community->rules()->where('rule_id',3)->first()->pivot->value);
+                $users_count = $community->users()->count();
+                //Community's users needed supporting the initiative
+                $needed = intval(ceil($users_count / 100.0 * $percentNeeded));
+                if ($this->supportedBy()->count()>=$needed){
+                    //the voting period starts now and his duration is calculated with de updated_at column
+                    //  updated now and the voting duration rule of the community
+                    //TODO send notifications to community users about a new initiative to be voted
+                    $this->supported=true;
+                    $this->save();
+                    return true;
+                }else return false;
+            }else{
+                $this->supported=false;
+                $this->save();
+                return false;
+            }
+        }else return $this->supported;
     }
 }

@@ -18,6 +18,10 @@ use lde\User;
 
 class InitiativeController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     public function create(Request $request)
     {
         $community = Community::find($request->community_id);
