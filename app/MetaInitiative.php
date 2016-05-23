@@ -9,6 +9,7 @@ namespace lde;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class MetaInitiative
@@ -31,7 +32,7 @@ class MetaInitiative extends Model
      * thread_id: The thread where users discuss about the metaInitiative
      */
     protected $fillable = [
-        'id','title', 'description', 'community_id', 'community_rule_id', 'thread_id', 'supported', 'approved'
+        'id', 'title', 'description', 'community_id', 'community_rule_id', 'thread_id', 'supported', 'approved'
     ];
 
     public function creator()
@@ -41,12 +42,17 @@ class MetaInitiative extends Model
 
     public function rule()
     {
-        return $this->belongsTo('lde\CommunityRule','community_rule_id');
+        return $this->belongsTo('lde\CommunityRule', 'community_rule_id');
     }
 
     public function thread()
     {
-        return $this->hasOne('lde\Thread','id','thread_id');
+        return $this->hasOne('lde\Thread', 'id', 'thread_id');
+    }
+
+    public function scope()
+    {
+        return $this->rule->community;
     }
 
     public function supportedBy()
@@ -56,7 +62,7 @@ class MetaInitiative extends Model
 
     public function votedBy()
     {
-        return $this->belongsToMany('lde\Community', 'metavotes');
+        return $this->belongsToMany('lde\Community', 'metavotes', 'metaInitiative_id');
     }
 
     /**
@@ -68,29 +74,94 @@ class MetaInitiative extends Model
      */
     public function checkSupport()
     {
-        if ($this->supported==null){
+        if ($this->supported == null) {
             $community = $this->rule->community;
-            $expireDays = intval($community->rules()->where('rule_id',2)->first()->pivot->value);
+            $expireDays = intval($community->rules()->where('rule_id', 2)->first()->pivot->value);
             $expireDate = $this->created_at->addDays($expireDays);
             $date = Carbon::now();
-            if ($expireDate>$date){
-                $percentNeeded = intval($community->rules()->where('rule_id',3)->first()->pivot->value);
+            if ($expireDate > $date) {
+                $percentNeeded = intval($community->rules()->where('rule_id', 3)->first()->pivot->value);
                 $users_count = $community->users()->count();
                 //Community's users needed supporting the initiative
                 $needed = intval(ceil($users_count / 100.0 * $percentNeeded));
-                if ($this->supportedBy()->count()>=$needed){
+                if ($this->supportedBy()->count() >= $needed) {
                     //the voting period starts now and his duration is calculated with de updated_at column
                     //  updated now and the voting duration rule of the community
                     //TODO send notifications to community users about a new initiative to be voted
-                    $this->supported=true;
+                    $this->supported = true;
                     $this->save();
                     return true;
-                }else return false;
-            }else{
-                $this->supported=false;
+                } else return false;
+            } else {
+                $this->supported = false;
                 $this->save();
                 return false;
             }
-        }else return $this->supported;
+        } else return $this->supported;
+    }
+
+    public function votesCount()
+    {
+        $yes=0;
+        $no=0;
+        $null=0;
+        $community=$this->scope();
+        foreach($community->users as $user){
+            $wrapper = $user->wrapper($this->scope()->id);
+            $vote = $wrapper->getVote($this);
+            if ($vote==null) $null++;
+            elseif ($vote) $yes++;
+            else $no++;
+        }
+        $votesResult = array([
+            'yes'=>$yes,
+            'no'=>$no,
+            'null'=>$null
+        ]);
+        return $votesResult;
+    }
+
+    public static function checkVoting()
+    {
+        $openedMetainitiatives = MetaInitiative::where([
+            'supported' => true,
+            'approved' => null,
+        ])->get();
+        foreach ($openedMetainitiatives as $openedMetainitiative) {
+            $scope = $openedMetainitiative->scope()->first();
+            $expireDays = intval($scope->rules()->where('rule_id', 4)->first()->pivot->value);
+            $expireDate = $openedMetainitiative->updated_at->addDays($expireDays);
+            $date = Carbon::now();
+            //If voting period has finished
+            if ($date >= $expireDate) {
+                $votesCount = $openedMetainitiative->votesCount()[0];
+                //TODO send notifications to community users about the voting result
+                DB::beginTransaction();
+                try{
+                    if ($votesCount['yes'] > $votesCount['no']) {
+                        //The metaInitiative has been approved so the rule must be updated
+                        $openedMetainitiative->approved=true;
+                        $communityRule = CommunityRule::find($openedMetainitiative->community_rule_id);
+                        $communityRule->value=$openedMetainitiative->value;
+                        $communityRule->save();
+                    } elseif ($votesCount['yes'] < $votesCount['no']) {
+                        $openedMetainitiative->approved=false;
+                    } else {
+                        //There has been a tie so the update_at date will be updated with the now() date
+                        //  and all the metaInitiative`s votes will be deleted in order to repeat the voting process
+                        $openedMetainitiative->null;
+                        $openedMetainitiative->updated_at=Carbon::now();
+                        MetaVote::where([
+                            'metaInitiative_id'=>$openedMetainitiative->id
+                        ])->delete();
+                    }
+                    $openedMetainitiative->save();
+                    DB::commit();
+                }catch (\Exception $e) {
+                    DB::rollback();
+                }
+
+            }
+        }
     }
 }

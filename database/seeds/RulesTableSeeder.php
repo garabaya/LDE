@@ -30,5 +30,10 @@ class RulesTableSeeder extends Seeder
             'type' => 'numeric',
             'description' => 'percentage of supporters required for an initiative to be voted'
         ]);
+        DB::table('rules')->insert([
+            'id' => 4,
+            'type' => 'numeric',
+            'description' => 'available days to vote an initiative'
+        ]);
     }
 }

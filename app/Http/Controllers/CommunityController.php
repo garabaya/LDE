@@ -89,9 +89,13 @@ class CommunityController extends Controller
             $community->user_id=$user->id;
             $community->type='general';
 
+
             //joining the user in the new community
             if ($community->save()) {
                 $this->joinIn($community->id);
+                foreach(Community::$rules as $rule => $value){
+                    $community->rules()->attach($rule, ['value' => $value]);
+                }
                 $success = true;
             }
         } catch (\Exception $e) {

@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Auth;
 use lde\Community;
 use lde\Http\Requests;
 use Illuminate\Http\Request;
+use lde\Initiative;
+use lde\MetaInitiative;
 
 class HomeController extends Controller
 {
@@ -30,9 +32,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        //TODO just now I need see all communities. I'll show only popular later
-//        $communities = Community::popular()->get();
-        $communities = Community::where('type','general')->get();
+        $communities = Community::popular()->get();
+//        $communities = Community::where('type','general')->get();
         $joined = Auth::user()->communities()->get();
         return view('home', [
             'coms' => $communities,

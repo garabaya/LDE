@@ -100,7 +100,7 @@ class MetainitiativeController extends Controller
     public function support(Request $request)
     {
         $metaInitiative = MetaInitiative::find($request->id);
-        if (Auth::user()->support($metaInitiative)) {
+        if (Auth::user()->wrapper($metaInitiative->scope()->id)->support($metaInitiative)) {
             return Redirect::back()->withErrors(array(
                 'success' => ['You are supporting now this initiative']));
         } else {

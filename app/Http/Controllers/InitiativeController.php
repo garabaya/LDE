@@ -155,7 +155,7 @@ class InitiativeController extends Controller
     public function support(Request $request)
     {
         $initiative = Initiative::find($request->id);
-        if (Auth::user()->support($initiative)) {
+        if (Auth::user()->wrapper($initiative->scope->id)->support($initiative)) {
             return Redirect::back()->withErrors(array(
                 'success' => ['You are supporting now this initiative']));
         } else {
