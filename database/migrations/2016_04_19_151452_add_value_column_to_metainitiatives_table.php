@@ -12,7 +12,7 @@ class AddValueColumnToMetainitiativesTable extends Migration
      */
     public function up()
     {
-        Schema::table('metainitiatives', function (Blueprint $table) {
+        Schema::table('metaInitiatives', function (Blueprint $table) {
             $table->string('value');
         });
     }
@@ -24,7 +24,7 @@ class AddValueColumnToMetainitiativesTable extends Migration
      */
     public function down()
     {
-        Schema::table('metainitiatives', function (Blueprint $table) {
+        Schema::table('metaInitiatives', function (Blueprint $table) {
             $table->dropColumn('value');
         });
     }

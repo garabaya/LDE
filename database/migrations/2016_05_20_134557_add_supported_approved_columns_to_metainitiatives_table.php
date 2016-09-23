@@ -12,7 +12,7 @@ class AddSupportedApprovedColumnsToMetainitiativesTable extends Migration
      */
     public function up()
     {
-        Schema::table('metainitiatives', function (Blueprint $table) {
+        Schema::table('metaInitiatives', function (Blueprint $table) {
             $table->boolean('supported')->nullable();
             $table->boolean('approved')->nullable();
         });
@@ -25,7 +25,7 @@ class AddSupportedApprovedColumnsToMetainitiativesTable extends Migration
      */
     public function down()
     {
-        Schema::table('metainitiatives', function (Blueprint $table) {
+        Schema::table('metaInitiatives', function (Blueprint $table) {
             $table->dropColumn('supported');
             $table->dropColumn('approved');
         });
