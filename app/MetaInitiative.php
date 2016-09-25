@@ -57,12 +57,12 @@ class MetaInitiative extends Model
 
     public function supportedBy()
     {
-        return $this->belongsToMany('lde\Community', 'metasupports', 'metaInitiative_id');
+        return $this->belongsToMany('lde\Community', 'metaSupports', 'metaInitiative_id');
     }
 
     public function votedBy()
     {
-        return $this->belongsToMany('lde\Community', 'metavotes', 'metaInitiative_id');
+        return $this->belongsToMany('lde\Community', 'metaVotes', 'metaInitiative_id');
     }
 
     /**
