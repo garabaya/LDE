@@ -6,7 +6,7 @@
  */
 use Illuminate\Database\Seeder;
 
-class InitiativetypesTableSeeder extends Seeder
+class InitiativeTypesTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -18,12 +18,12 @@ class InitiativetypesTableSeeder extends Seeder
         /**
          * Rules will not change and we will need a fixed id for each one
          */
-        DB::table('initiativetypes')->delete();
-        DB::table('initiativetypes')->insert([
+        DB::table('initiativeTypes')->delete();
+        DB::table('initiativeTypes')->insert([
             'id' => 1,
             'type' => 'general'
         ]);
-        DB::table('initiativetypes')->insert([
+        DB::table('initiativeTypes')->insert([
             'id' => 2,
             'type' => 'economy'
         ]);
